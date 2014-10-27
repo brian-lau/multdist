@@ -1,7 +1,7 @@
-multdist (2-d Kolmorogov-Smirnov test, n-d energy test)
+multdist
 ========
 
-Matlab code for non-parametrically testing whether two multidimensional samples were drawn from the same parent distribution. One function implements Fasano & Franceschini's generalization [1] to two dimensions (kstest2d.m) of the Kolmorogov-Smirnov test, while the second implements Aslan & Zech's test based on an analogy to statistical energy [2], which is minimized when the two samples are drawn from the same parent distribution (minentest.m). In both cases, the analytic distribution of the statistic is unknown, and approximations are used for statistical testing. For the K-S test, I use an approximation due to Press et al. [3] that represents a fit to the percentiles that Fasano & Franceschini obtained by Monte Carlo simulation of a simple model. For the energy test, p-values are obtained via permutation of the aggregated samples.
+Matlab code for non-parametrically testing whether two multidimensional samples were drawn from the same parent distribution. One function implements Fasano & Franceschini's generalization [1] to two dimensions (`kstest2d.m`) of the Kolmorogov-Smirnov test, while the second implements Aslan & Zech's test based on an analogy to statistical energy [2], which is minimized when the two samples are drawn from the same parent distribution (`minentest.m`). In both cases, the analytic distribution of the statistic is unknown, and approximations are used for statistical testing. For the K-S test, I use an approximation due to Press et al. [3] that represents a fit to the percentiles that Fasano & Franceschini obtained by Monte Carlo simulation of a simple model. For the energy test, p-values are obtained via permutation of the aggregated samples.
 
 The K-S test currently only works for two-dimensional data, but the minimum energy test accepts n-dimensional inputs (although significance testing may become prohibitively expensive).
 
