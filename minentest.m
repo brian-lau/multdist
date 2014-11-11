@@ -15,7 +15,7 @@
 %     y     - [n2 x d] matrix
 %
 %     OPTIONAL
-%     flag  - 'sr', Sz?kely & Rizzo energy statistic 
+%     flag  - 'sr', Szekely & Rizzo energy statistic 
 %             'az', Aslan & Zech energy statistic (default)
 %     nboot - # of bootstrap resamples
 %
@@ -27,7 +27,7 @@
 %     Aslan, B, Zech, G (2005) Statistical energy as a tool for binning-free
 %       multivariate goodness-of-fit tests, two-sample comparison and unfolding.
 %       Nuc Instr and Meth in Phys Res A 537: 626-636
-%     Sz?kely, G, Rizzo, M (2014) Energy statistics: A class of statistics
+%     Szekely, G, Rizzo, M (2014) Energy statistics: A class of statistics
 %       based on distances. J Stat Planning & Infer 143: 1249-1272
 %
 %     SEE ALSO
@@ -59,27 +59,85 @@
 %  o k-sample version
 
 
-function [p,e_nm] = minentest(x,y,flag,nboot)
+function [p,e_nm,e_nm_boot] = minentest(x,y,flag,nboot,replace)
+
+if nargin < 5
+   replace = false;
+end
 
 if nargin < 4
    nboot = 1000;
 end
 
 if nargin < 3
-   flag = 'az';
+   flag = 'sr';
 end
 
 n = size(x,1);
 m = size(y,1);
 
-e_nm = energy(x,y,flag);
-e_nm_boot = zeros(nboot,1);
 pooled = [x ; y];
 
+if 0
+e_nm = energy(x,y,flag);
+e_nm_boot = zeros(nboot,1);
 for i = 1:nboot
-   ind = randperm(n+m);
+   if replace
+      ind = unidrnd(n+m,1,n+m);
+   else
+      ind = randperm(n+m);
+   end
    e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
 end
+
+else
+dpooled = pdist2(pooled,pooled,'euclidean');
+
+indx = 1:n;
+dx = triu(dpooled(indx,indx));
+dx = dx(dx~=0);
+indy = (n+1):(n+m);
+dy = triu(dpooled(indy,indy));
+dy = dy(dy~=0);
+dxy = dpooled(indx,indy);
+e_nm = energy_d(dx,dy,dxy,flag);
+
+e_nm_boot = zeros(nboot,1);
+
+for i = 1:nboot
+   if replace
+      ind = unidrnd(n+m,1,n+m);
+   else
+      ind = randperm(n+m);
+   end
+   indx = ind(1:n);
+   dx = triu(dpooled(indx,indx));
+   dx = dx(dx~=0);
+   indy = ind(n+1:end);
+   dy = triu(dpooled(indy,indy));
+   dy = dy(dy~=0);
+   dxy = dpooled(indx,indy);
+   e_nm_boot(i) = energy_d(dx,dy,dxy,flag);
+end
+end
+% if replace
+%    for i = 1:nboot
+%       ind = randperm(n+m);
+%       e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
+%    end
+% else
+%    for i = 1:nboot
+%       ind = randperm(n+m);
+%       indx = ind(1:n);
+%       dx = triu(dpooled(indx,indx));
+%       dx = dx(dx~=0);
+%       indy = ind(n+1:end);
+%       dy = triu(dpooled(indy,indy));
+%       dy = dy(dy~=0);
+%       dxy = dpooled(indx,indy);
+%       e_nm_boot(i) = energy_d(dx,dy,dxy,flag);
+%    end
+% end
 
 p = sum(e_nm_boot>e_nm)./nboot;
 
@@ -94,6 +152,31 @@ function z = energy(x,y,flag)
 n = size(x,1);
 m = size(y,1);
 [dx,dy,dxy] = dist(x,y);
+switch flag
+   case 'az'
+      % Aslan & Zech definition of energy statistic 
+      z = (1/(n*(n-1)))*sum(-log(dx)) + (1/(m*(m-1)))*sum(-log(dy))...
+         - (1/(n*m))*sum(-log(dxy(:)));
+   case 'sr'
+      % Szekely & Rizzo definition of energy statistic
+      % Verified against their R package 'energy'
+      % in R:
+      %   data(iris)
+      %   eqdist.etest(iris[,1:4], c(75,75), R = 199)
+      %   E-statistic = 126.0453, p-value = 0.005
+      % in Matlab:
+      %   load fisheriris;
+      %   [p,en] = minentest(meas(1:75,:),meas(76:end,:),'sr')
+      z = (2/(n*m))*sum(dxy(:)) - (1/(n^2))*sum(2*dx) - (1/(m^2))*sum(2*dy);
+      z = ((n*m)/(n+m)) * z;
+   otherwise
+      error('Bad FLAG');
+end
+
+function z = energy_d(dx,dy,dxy,flag)
+% FIXME, equal samples will generate infinite values, will produce
+% unreliable results, more of a problem for discrete data.
+[n,m] = size(dxy);
 switch flag
    case 'az'
       % Aslan & Zech definition of energy statistic 
