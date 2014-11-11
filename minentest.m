@@ -1,6 +1,6 @@
 % minentest                  N-dimensional, 2-sample comparison of 2 distributions
 % 
-%     [p,phi_nm] = minentest(x,y,nboot);
+%     [p,e_nm] = minentest(x,y,flag,nboot)
 %
 %     Compares d-dimensional data from two samples using a measure based on
 %     statistical energy. The test is non-parametric, does not require binning
@@ -11,17 +11,24 @@
 %     according to simulations by Aslan & Zech.
 %
 %     INPUTS
-%     x - [n1 x d] matrix
-%     y - [n2 x d] matrix
+%     x     - [n1 x d] matrix
+%     y     - [n2 x d] matrix
+%
+%     OPTIONAL
+%     flag  - 'sr', Sz?kely & Rizzo energy statistic 
+%             'az', Aslan & Zech energy statistic (default)
+%     nboot - # of bootstrap resamples
 %
 %     OUTPUTS
-%     p - p-value by permutation
-%     D - minimum energy statistic
+%     p    - p-value by permutation
+%     e_nm - minimum energy statistic
 %
 %     REFERENCE
 %     Aslan, B, Zech, G (2005) Statistical energy as a tool for binning-free
 %       multivariate goodness-of-fit tests, two-sample comparison and unfolding.
 %       Nuc Instr and Meth in Phys Res A 537: 626-636
+%     Sz?kely, G, Rizzo, M (2014) Energy statistics: A class of statistics
+%       based on distances. J Stat Planning & Infer 143: 1249-1272
 %
 %     SEE ALSO
 %     kstest2d
@@ -46,39 +53,32 @@
 %     REVISION HISTORY:
 %     brian 08.25.11 written
 
-function [p,e_nm] = minentest(x,y,flag,nboot,replace)
+% TODO 
+%  o with or without replacement
+%    with, calculate distance matrix once and cache, permute index
+%  o k-sample version
 
-% with or without replacement
-% with, calculate distance matrix once and cache, permute index
-if nargin < 5
-   replace = false;
-end
+
+function [p,e_nm] = minentest(x,y,flag,nboot)
 
 if nargin < 4
    nboot = 1000;
 end
 
 if nargin < 3
-   flag = 'sr';
+   flag = 'az';
 end
 
 n = size(x,1);
 m = size(y,1);
 
-[e_nm,dx,dy,dxy] = energy(x,y,flag);
+e_nm = energy(x,y,flag);
 e_nm_boot = zeros(nboot,1);
 pooled = [x ; y];
 
-if replace
-   for i = 1:nboot
-      ind = randperm(n+m);
-      e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
-   end
-else
-   for i = 1:nboot
-      ind = randperm(n+m);
-      e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
-   end
+for i = 1:nboot
+   ind = randperm(n+m);
+   e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
 end
 
 p = sum(e_nm_boot>e_nm)./nboot;
@@ -88,7 +88,7 @@ dx = pdist(x,'euclidean');
 dy = pdist(y,'euclidean');
 dxy = pdist2(x,y,'euclidean');
 
-function [z,dx,dy,dxy] = energy(x,y,flag)
+function z = energy(x,y,flag)
 % FIXME, equal samples will generate infinite values, will produce
 % unreliable results, more of a problem for discrete data.
 n = size(x,1);
