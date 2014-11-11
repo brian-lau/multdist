@@ -28,7 +28,7 @@
 
 %     $ Copyright (C) 2014 Brian Lau http://www.subcortex.net/ $
 %     The full license and most recent version of the code can be found on GitHub:
-%     https://github.com/brian-lau/Granger
+%     https://github.com/brian-lau/multdist
 %
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -46,29 +46,71 @@
 %     REVISION HISTORY:
 %     brian 08.25.11 written
 
-function [p,phi_nm] = minentest(x,y,nboot)
+function [p,e_nm] = minentest(x,y,flag,nboot,replace)
 
-if nargin < 3
+% with or without replacement
+% with, calculate distance matrix once and cache, permute index
+if nargin < 5
+   replace = false;
+end
+
+if nargin < 4
    nboot = 1000;
 end
 
-n = length(x);
-m = length(y);
-
-phi_nm = r_log(x,n,y,m);
-
-xy = [x ; y];
-phi_nm_boot = zeros(nboot,1);
-for i = 1:nboot
-   ind = randperm(n+m);
-   phi_nm_boot(i) = r_log(xy(ind(1:n),:),n,xy(ind(n+1:end),:),m);
+if nargin < 3
+   flag = 'sr';
 end
 
-p = sum(phi_nm_boot>phi_nm)./nboot;
+n = size(x,1);
+m = size(y,1);
 
-function z = r_log(x,n,y,m)
+[e_nm,dx,dy,dxy] = energy(x,y,flag);
+e_nm_boot = zeros(nboot,1);
+pooled = [x ; y];
 
-a = -log(pdist(x,'euclidean'));
-b = -log(pdist(y,'euclidean'));
-c = -log(pdist2(x,y,'euclidean'));
-z = (1/(n*(n-1)))*sum(a) + (1/(m*(m-1)))*sum(b) - (1/(n*m))*sum(c(:));
+if replace
+   for i = 1:nboot
+      ind = randperm(n+m);
+      e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
+   end
+else
+   for i = 1:nboot
+      ind = randperm(n+m);
+      e_nm_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
+   end
+end
+
+p = sum(e_nm_boot>e_nm)./nboot;
+
+function [dx,dy,dxy] = dist(x,y)
+dx = pdist(x,'euclidean');
+dy = pdist(y,'euclidean');
+dxy = pdist2(x,y,'euclidean');
+
+function [z,dx,dy,dxy] = energy(x,y,flag)
+% FIXME, equal samples will generate infinite values, will produce
+% unreliable results, more of a problem for discrete data.
+n = size(x,1);
+m = size(y,1);
+[dx,dy,dxy] = dist(x,y);
+switch flag
+   case 'az'
+      % Aslan & Zech definition of energy statistic 
+      z = (1/(n*(n-1)))*sum(-log(dx)) + (1/(m*(m-1)))*sum(-log(dy))...
+         - (1/(n*m))*sum(-log(dxy(:)));
+   case 'sr'
+      % Szekely & Rizzo definition of energy statistic
+      % Verified against their R package 'energy'
+      % in R:
+      %   data(iris)
+      %   eqdist.etest(iris[,1:4], c(75,75), R = 199)
+      %   E-statistic = 126.0453, p-value = 0.005
+      % in Matlab:
+      %   load fisheriris;
+      %   [p,en] = minentest(meas(1:75,:),meas(76:end,:),'sr')
+      z = (2/(n*m))*sum(dxy(:)) - (1/(n^2))*sum(2*dx) - (1/(m^2))*sum(2*dy);
+      z = ((n*m)/(n+m)) * z;
+   otherwise
+      error('Bad FLAG');
+end
