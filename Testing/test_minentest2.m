@@ -1,4 +1,9 @@
 % Compare two distance metrics
+% prob_sr replicates Table 1 from 
+% Szekely & Rizzo (2004) Testing for equal distributions in high dimensions
+% See also 
+% Baringhaus & Franz (2004) On a new multivariate two-sample test
+% for Hotelling T^2 comparisons
 
 n = [10 15 20 25 30 40 50 75 100];
 delta = [0 .5 .75 1];
