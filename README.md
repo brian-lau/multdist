@@ -7,19 +7,28 @@ The K-S test currently only works for two-dimensional data, but the minimum ener
 
 Both functions are written as two-sample tests, although modifying the minimum energy test for testing goodness-of-fit is straightforward if it is possible to sample from the distribution one is interested in testing the data against (detailed in reference [2]).
 
-1. Fasano, G, Franceschini, A (1987). A multidimensional version of the Kolmorogov-Smirnov test. Mon Not R astr Soc, 225:155-70
+1. Fasano, G, Franceschini, A (1987). A multidimensional version of the Kolmorogov-Smirnov test. Mon Not R Astr Soc, 225:155-70
 2. Aslan, B, Zech, G (2005). Statistical energy as a tool for binning-free, multivariate goodness-of-fit tests, two sample comparison and unfolding. Nuc Instr and Meth in Phys Res A, 537: 626-36
-3. Szekely, G, Rizzo, M (2014) Energy statistics: A class of statistics based on distances. J Stat Planning & Infer 143: 1249-1272
+3. Szekely, G, Rizzo, M (2014) Energy statistics: A class of statistics based on distances. J Stat Planning & Inference 143: 1249-1272
 4. Press et al. (1992).  Numerical Recipes in C. Cambridge University Press
 
-Installation and example
+Installation and examples
 ========
 
-Install the functions under your Matlab path. The following example should get you started:
+Install the functions under your Matlab path. The following examples should get you started.
+####Difference in multivariate means:
+```
+x = randn(100,2); y = bsxfun(@plus,[.2 .2],randn(100,2));
+[pm,e_n] = minentest(x,y) % 2-d minimum energy test
+[pk,D] = kstest2d(x,y) % 2-d K-S test
+[pt,T2] = hotell2(x,y) % Hotelling T^2 test
+```
+
+####Difference in distributions:
 ```
 x = randn(100,2); y = log(abs(randn(100,2)));
-[pm,e_nm] = minentest(x,y) % 2-d minimum energy test
-[pk,D] = kstest2d(x,y) % 2-d K-S test
+[pm,e_n] = minentest(x,y)
+[pk,D] = kstest2d(x,y)
 ```
 The following figure shows the results of some monte-carlo simulations I ran to explore the power of these statistics for comparing 2-d samples. I sampled from four different distributions (Px in each quadrant of the figure) and ran two tests: 1) whether this sample came from the same parent distribution as another sample from the same distribution (Px compared to Px) and 2) whether this sample came from the same parent distribution as another sample of the same size drawn from standard normal (Px compared to Py). Both tests have good rejection power, although the 2-d K-S test performs poorly in one case, and has a slightly inflated Type I error rate at all tested sample sizes (the p-value is approximate, so perhaps this is unsurprising). Details follow the figure.
 

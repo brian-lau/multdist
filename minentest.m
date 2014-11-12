@@ -32,7 +32,7 @@
 %       based on distances. J Stat Planning & Infer 143: 1249-1272
 %
 %     SEE ALSO
-%     kstest2d
+%     kstest2d, hotell2
 
 %     $ Copyright (C) 2014 Brian Lau http://www.subcortex.net/ $
 %     The full license and most recent version of the code can be found on GitHub:

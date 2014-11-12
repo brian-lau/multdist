@@ -1,8 +1,8 @@
 % Compare two distance metrics
 
-n = [10 50];%[10 15 20 25 30 40 50 75 100];
-delta = [0 .5];%[0 .5 .75 1];
-reps = 10;
+n = [10 15 20 25 30 40 50 75 100];
+delta = [0 .5 .75 1];
+reps = 500;
 alpha = 0.1;
 nboot = 500;
 
@@ -15,11 +15,11 @@ for i = 1:length(n)
          
          pval_az(i,j,k) = minentest(x,y,'az',nboot);
          pval_sr(i,j,k) = minentest(x,y,'sr',nboot);
-         
-         % add T2 test
+         pval_T2(i,j,k) = hotell2(x,y);
       end
       prob_az(i,j) = sum(squeeze(pval_az(i,j,:))<alpha)/reps;
       prob_sr(i,j) = sum(squeeze(pval_sr(i,j,:))<alpha)/reps;
+      prob_T2(i,j) = sum(squeeze(pval_T2(i,j,:))<alpha)/reps;
    toc
    end
 end

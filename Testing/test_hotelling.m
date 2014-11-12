@@ -3,10 +3,10 @@
 temp = load('Testing/swiss.txt');
 x = temp(1:100,:);
 y = temp(101:200,:);
-
-%[pval,T2] = hotell2(x,y)
-
 hotell2(x,y)
+
+% This will not match exactly, since we use the T2-statistic defined by
+% Mardia et al.
 
 % From http://sites.stat.psu.edu/~ajw13/stat505/fa06/11_2sampHotel/01_2sampHotel.html
 %                   2-Sample Hotellings T2 - Swiss Bank Notes                 20
@@ -66,3 +66,5 @@ hotell2(x,y)
 %                      T2         F       DF1       DF2         P
 % 
 %               2412.4507  391.9217         6       193         0
+
+% also try this http://sas-and-r.blogspot.fr/2010/05/example-737-calculation-of-hotellings.html

@@ -3,7 +3,7 @@
 %     [pval,T2] = hotell2(x,y)
 %
 %     Hotelling's T-Squared test for comparing d-dimensional data from two 
-%     independent samples.
+%     independent samples, assuming normality w/ common covariance matrix.
 %
 %     INPUTS
 %     x    - [n1 x d] matrix
@@ -14,8 +14,7 @@
 %     T2   - minimum energy statistic
 %
 %     REFERENCE
-%     Mardia, KV, Kent, JT, Bibby JM (1979) Multivariate Analysis.
-%       Section 3.6.1. Academic Press
+%     Mardia, K, Kent, J, Bibby J (1979) Multivariate Analysis. Section 3.6.1
 %
 %     SEE ALSO
 %     kstest2d, minentest
@@ -56,14 +55,13 @@ Sx = cov(x);
 Sy = cov(y);
 
 % Hotelling T2 statistic, Section 3.6.1 Mardia et al.
-Su = (nx*Sx + ny*Sy) / (n-2);
+%Su = ((nx-1)*Sx + (ny-1)*Sy) / (n-2);
+Su = (nx*Sx + ny*Sy) / (n-2); % unbiased estimate
 d = mux - muy;
 D2 = d*inv(Su)*d';
 T2 = ((nx*ny)/n)*D2;
 F = T2 * (n-p-1) / ((n-2)*p);
-% Sp = ((nx-1)*Sx + (ny-1)*Sy) / (nx+ny-2);
-% T2 = d * inv(Sp*(1/nx + 1/ny)) * d';
-% F = T2 * (nx+ny-p-1) / (p*(nx+ny-2));
+
 pval = 1 - fcdf(F,p,n-p-1);
 
 if nargout == 0
