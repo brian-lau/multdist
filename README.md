@@ -1,7 +1,7 @@
 multdist
 ========
 
-Matlab code for non-parametrically testing whether two multidimensional samples were drawn from the same parent distribution. One function implements Fasano & Franceschini's generalization [1] to two dimensions (`kstest2d.m`) of the Kolmorogov-Smirnov test, while the second implements Aslan & Zech's and Sz?kely & Rizzo's test based on an analogy to statistical energy [2], which is minimized when the two samples are drawn from the same parent distribution (`minentest.m`). In both cases, the analytic distribution of the statistic is unknown, and approximations are used for statistical testing. For the K-S test, I use an approximation due to Press et al. [3] that represents a fit to the percentiles that Fasano & Franceschini obtained by Monte Carlo simulation of a simple model. For the energy test, p-values are obtained via permutation of the aggregated samples.
+Matlab code for non-parametrically testing whether two multidimensional samples were drawn from the same parent distribution. One function implements Fasano & Franceschini's generalization [1] to two dimensions (`kstest2d.m`) of the Kolmorogov-Smirnov test, while the second implements Aslan & Zech's and Szekely & Rizzo's test based on an analogy to statistical energy [2], which is minimized when the two samples are drawn from the same parent distribution (`minentest.m`). In both cases, the analytic distribution of the statistic is unknown, and approximations are used for statistical testing. For the K-S test, I use an approximation due to Press et al. [3] that represents a fit to the percentiles that Fasano & Franceschini obtained by Monte Carlo simulation of a simple model. For the energy test, p-values are obtained via permutation of the aggregated samples.
 
 The K-S test currently only works for two-dimensional data, but the minimum energy test accepts n-dimensional inputs (although significance testing may become prohibitively expensive).
 
@@ -9,7 +9,7 @@ Both functions are written as two-sample tests, although modifying the minimum e
 
 1. Fasano, G, Franceschini, A (1987). A multidimensional version of the Kolmorogov-Smirnov test. Mon Not R astr Soc, 225:155-70
 2. Aslan, B, Zech, G (2005). Statistical energy as a tool for binning-free, multivariate goodness-of-fit tests, two sample comparison and unfolding. Nuc Instr and Meth in Phys Res A, 537: 626-36
-3. Sz?kely, G, Rizzo, M (2014) Energy statistics: A class of statistics based on distances. J Stat Planning & Infer 143: 1249-1272
+3. Szekely, G, Rizzo, M (2014) Energy statistics: A class of statistics based on distances. J Stat Planning & Infer 143: 1249-1272
 4. Press et al. (1992).  Numerical Recipes in C. Cambridge University Press
 
 Installation and example
