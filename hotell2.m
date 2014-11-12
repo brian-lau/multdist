@@ -13,6 +13,10 @@
 %     pval - p-value by permutation
 %     T2   - minimum energy statistic
 %
+%     REFERENCE
+%     Mardia, KV, Kent, JT, Bibby JM (1979) Multivariate Analysis.
+%       Section 3.6.1. Academic Press
+%
 %     SEE ALSO
 %     kstest2d, minentest
 
@@ -44,17 +48,23 @@ else
    p = px;
 end
 
+n = nx + ny;
 mux = mean(x);
 muy = mean(y);
 
 Sx = cov(x);
 Sy = cov(y);
-Sp = ((nx-1)*Sx + (ny-1)*Sy) / (nx+ny-2);
 
+% Hotelling T2 statistic, Section 3.6.1 Mardia et al.
+Su = (nx*Sx + ny*Sy) / (n-2);
 d = mux - muy;
-T2 = d * inv(Sp*(1/nx + 1/ny)) * d';
-F = T2 * (nx+ny-p-1) / (p*(nx+ny-2));
-pval = 1 - fcdf(F,p,nx+ny-p-1);
+D2 = d*inv(Su)*d';
+T2 = ((nx*ny)/n)*D2;
+F = T2 * (n-p-1) / ((n-2)*p);
+% Sp = ((nx-1)*Sx + (ny-1)*Sy) / (nx+ny-2);
+% T2 = d * inv(Sp*(1/nx + 1/ny)) * d';
+% F = T2 * (nx+ny-p-1) / (p*(nx+ny-2));
+pval = 1 - fcdf(F,p,n-p-1);
 
 if nargout == 0
    fprintf('-------------------------------\n');
@@ -67,7 +77,7 @@ if nargout == 0
    fprintf('%1.3f, ',muy);
    fprintf('\n');
    fprintf('  T2 = %5.3f\n',T2);
-   fprintf('  F(%g,%g) = %5.3f\n',p,nx+ny-p-1,F);
+   fprintf('  F(%g,%g) = %5.3f\n',p,n-p-1,F);
    fprintf('  p = %5.5f\n',pval);
    fprintf('-------------------------------\n');
 end
