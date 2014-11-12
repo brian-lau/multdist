@@ -56,6 +56,7 @@
 
 % TODO 
 %  o calculate distance matrix once and cache, permute index
+%    attempted once, https://github.com/brian-lau/multdist/commit/ae58496848464cea50fe134ab6f1e2f929632c88
 %  o k-sample version
 %  o incomplete V-statistic
 
@@ -81,7 +82,8 @@ pooled = [x ; y];
 
 e_n = energy(x,y,flag);
 e_n_boot = zeros(nboot,1);
-for i = 1:nboot
+e_n_boot(1) = e_n;
+for i = 2:nboot
    if replace
       ind = unidrnd(n+m,1,n+m);
    else
@@ -90,7 +92,7 @@ for i = 1:nboot
    e_n_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
 end
 
-p = sum(e_n_boot>e_n)./nboot;
+p = sum(e_n_boot>=e_n)./nboot;
 
 function [dx,dy,dxy] = dist(x,y)
 dx = pdist(x,'euclidean');
@@ -117,7 +119,7 @@ switch flag
       %   E-statistic = 126.0453, p-value = 0.005
       % in Matlab:
       %   load fisheriris;
-      %   [p,en] = minentest(meas(1:75,:),meas(76:end,:),'sr')
+      %   [p,en] = minentest(meas(1:75,:),meas(76:end,:),'sr',200)
       z = (2/(n*m))*sum(dxy(:)) - (1/(n^2))*sum(2*dx) - (1/(m^2))*sum(2*dy);
       z = ((n*m)/(n+m)) * z;
    otherwise
