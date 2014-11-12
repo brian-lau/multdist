@@ -1,6 +1,6 @@
 % minentest                  N-dimensional, 2-sample comparison of 2 distributions
 % 
-%     [p,phi_nm] = minentest(x,y,nboot);
+%     [p,e_nm] = minentest(x,y,flag,nboot)
 %
 %     Compares d-dimensional data from two samples using a measure based on
 %     statistical energy. The test is non-parametric, does not require binning
@@ -11,24 +11,32 @@
 %     according to simulations by Aslan & Zech.
 %
 %     INPUTS
-%     x - [n1 x d] matrix
-%     y - [n2 x d] matrix
+%     x     - [n1 x d] matrix
+%     y     - [n2 x d] matrix
+%
+%     OPTIONAL
+%     flag  - 'sr', Szekely & Rizzo energy statistic 
+%             'az', Aslan & Zech energy statistic (default)
+%     nboot - # of bootstrap resamples
 %
 %     OUTPUTS
-%     p - p-value by permutation
-%     D - minimum energy statistic
+%     p    - p-value by permutation
+%     e_n  - minimum energy statistic
+%     e_n_boot - bootstrap samples
 %
 %     REFERENCE
 %     Aslan, B, Zech, G (2005) Statistical energy as a tool for binning-free
 %       multivariate goodness-of-fit tests, two-sample comparison and unfolding.
 %       Nuc Instr and Meth in Phys Res A 537: 626-636
+%     Szekely, G, Rizzo, M (2014) Energy statistics: A class of statistics
+%       based on distances. J Stat Planning & Infer 143: 1249-1272
 %
 %     SEE ALSO
-%     kstest2d
+%     kstest2d, hotell2
 
 %     $ Copyright (C) 2014 Brian Lau http://www.subcortex.net/ $
 %     The full license and most recent version of the code can be found on GitHub:
-%     https://github.com/brian-lau/Granger
+%     https://github.com/brian-lau/multdist
 %
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -46,29 +54,74 @@
 %     REVISION HISTORY:
 %     brian 08.25.11 written
 
-function [p,phi_nm] = minentest(x,y,nboot)
+% TODO 
+%  o calculate distance matrix once and cache, permute index
+%    attempted once, https://github.com/brian-lau/multdist/commit/ae58496848464cea50fe134ab6f1e2f929632c88
+%  o k-sample version
+%  o incomplete V-statistic
 
-if nargin < 3
+
+function [p,e_n,e_n_boot] = minentest(x,y,flag,nboot,replace)
+
+if nargin < 5
+   replace = false;
+end
+
+if nargin < 4
    nboot = 1000;
 end
 
-n = length(x);
-m = length(y);
-
-phi_nm = r_log(x,n,y,m);
-
-xy = [x ; y];
-phi_nm_boot = zeros(nboot,1);
-for i = 1:nboot
-   ind = randperm(n+m);
-   phi_nm_boot(i) = r_log(xy(ind(1:n),:),n,xy(ind(n+1:end),:),m);
+if nargin < 3
+   flag = 'sr';
 end
 
-p = sum(phi_nm_boot>phi_nm)./nboot;
+n = size(x,1);
+m = size(y,1);
 
-function z = r_log(x,n,y,m)
+pooled = [x ; y];
 
-a = -log(pdist(x,'euclidean'));
-b = -log(pdist(y,'euclidean'));
-c = -log(pdist2(x,y,'euclidean'));
-z = (1/(n*(n-1)))*sum(a) + (1/(m*(m-1)))*sum(b) - (1/(n*m))*sum(c(:));
+e_n = energy(x,y,flag);
+e_n_boot = zeros(nboot,1);
+e_n_boot(1) = e_n;
+for i = 2:nboot
+   if replace
+      ind = unidrnd(n+m,1,n+m);
+   else
+      ind = randperm(n+m);
+   end
+   e_n_boot(i) = energy(pooled(ind(1:n),:),pooled(ind(n+1:end),:),flag);
+end
+
+p = sum(e_n_boot>=e_n)./nboot;
+
+function [dx,dy,dxy] = dist(x,y)
+dx = pdist(x,'euclidean');
+dy = pdist(y,'euclidean');
+dxy = pdist2(x,y,'euclidean');
+
+function z = energy(x,y,flag)
+% FIXME, equal samples will generate infinite values, will produce
+% unreliable results, more of a problem for discrete data.
+n = size(x,1);
+m = size(y,1);
+[dx,dy,dxy] = dist(x,y);
+switch flag
+   case 'az'
+      % Aslan & Zech definition of energy statistic 
+      z = (1/(n*(n-1)))*sum(-log(dx)) + (1/(m*(m-1)))*sum(-log(dy))...
+         - (1/(n*m))*sum(-log(dxy(:)));
+   case 'sr'
+      % Szekely & Rizzo definition of energy statistic
+      % Verified against their R package 'energy'
+      % in R:
+      %   data(iris)
+      %   eqdist.etest(iris[,1:4], c(75,75), R = 199)
+      %   E-statistic = 126.0453, p-value = 0.005
+      % in Matlab:
+      %   load fisheriris;
+      %   [p,en] = minentest(meas(1:75,:),meas(76:end,:),'sr',200)
+      z = (2/(n*m))*sum(dxy(:)) - (1/(n^2))*sum(2*dx) - (1/(m^2))*sum(2*dy);
+      z = ((n*m)/(n+m)) * z;
+   otherwise
+      error('Bad FLAG');
+end

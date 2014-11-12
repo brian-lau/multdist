@@ -23,11 +23,11 @@
 %     Press et al (1992). Numerical Recipes in C, section 14.7
 %
 %     SEE ALSO
-%     minentest
+%     minentest, hotell2
 
 %     $ Copyright (C) 2014 Brian Lau http://www.subcortex.net/ $
 %     The full license and most recent version of the code can be found on GitHub:
-%     https://github.com/brian-lau/Granger
+%     https://github.com/brian-lau/multdist
 %
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
