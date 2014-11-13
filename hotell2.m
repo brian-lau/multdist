@@ -10,8 +10,8 @@
 %     y    - [n2 x d] matrix
 %
 %     OUTPUTS
-%     pval - p-value by permutation
-%     T2   - minimum energy statistic
+%     pval - asymptotic p-value
+%     T2   - Hotelling T^2 statistic
 %
 %     REFERENCE
 %     Mardia, K, Kent, J, Bibby J (1979) Multivariate Analysis. Section 3.6.1

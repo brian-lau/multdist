@@ -52,8 +52,12 @@ function [p,D] = kstest2d(s1,s2)
 assign_point = false; % Set true to assign center point to maximizing quadrant
                       % Leave this false if you want FF's original procedure
 
-n1 = length(s1);
-n2 = length(s2);
+[n1,m1] = size(s1);
+[n2,m2] = size(s2);
+
+if ~all([m1,m2]==2)
+   error('# of columns in X and Y must equal 2');
+end
 
 D = zeros(n1+n2,4);
 count = 0;

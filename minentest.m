@@ -17,7 +17,8 @@
 %     OPTIONAL
 %     flag  - 'sr', Szekely & Rizzo energy statistic 
 %             'az', Aslan & Zech energy statistic (default)
-%     nboot - # of bootstrap resamples
+%     nboot - # of bootstrap resamples (default = 1000)
+%     replace - boolean for sampling with replacement (default = false)
 %
 %     OUTPUTS
 %     p    - p-value by permutation
@@ -75,8 +76,12 @@ if nargin < 3
    flag = 'sr';
 end
 
-n = size(x,1);
-m = size(y,1);
+[n,ny] = size(x);
+[m,my] = size(y);
+
+if ny ~= my
+   error('# of columns in X and Y must match');
+end
 
 pooled = [x ; y];
 
