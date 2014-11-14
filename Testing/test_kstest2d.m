@@ -1,5 +1,5 @@
-%n = round(logspace(log10(10),log10(5000),6));
-%n = [200];
+% Compare to Fasano & Franceschini simulations
+
 n = [5 7 10 15 20 30 50 100 200 500 1000 2000 5000];
 samples = 100;
 
@@ -22,16 +22,7 @@ for i = 1:length(n)
    t(i) = toc;
    toc
 end
-% for i = 1:length(n)
-%    for j = 1:samples
-%       D(i,j) = Z(i,j)/sqrt(n(i));
-%    end
-% end
-% for i = 1:length(n)
-%    for j = 1:samples
-%       Z2(i,j) = D(i,j)*sqrt((n(i)^2)/(n(i)*2));
-%    end
-% end
+
 % Significance level
 sl_ff = [30 40 50 60 70 80 90 95 99];
 slMat = zeros(length(n),length(sl_ff));
