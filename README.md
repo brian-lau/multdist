@@ -25,7 +25,7 @@ x = randn(100,2); y = bsxfun(@plus,[.2 .2],randn(100,2));
 [pt,T2] = hotell2(x,y) % Hotelling T^2 test
 ```
 The following figure shows the results of some monte-carlo simulations exploring power when comparing 2-d samples from the same distribution (Gaussian, unit standard deviations), with one set of data with a different mean along one dimension. Szekely & Rizzo's energy test dominates Aslan & Zech's, and performs as well as the parametric Hotelling T^2 test, suggesting that Szekely & Rizzo's energy test is suitable even when one knows that the samples are multivariate Guassian.
-<img src="https://raw.githubusercontent.com/brian-lau/multdist/master/Testing/statistical-power-comparison-multidimensional.png" alt="Drawing" style="width: 700px;" />
+<img src="https://raw.githubusercontent.com/brian-lau/multdist/master/Testing/power-energy.png" alt="Drawing" style="width: 700px;" />
 ####Difference in distributions:
 ```
 x = randn(100,2); y = log(abs(randn(100,2)));
@@ -34,7 +34,7 @@ x = randn(100,2); y = log(abs(randn(100,2)));
 ```
 The following figure shows the results of some monte-carlo simulations exploring power when comparing 2-d samples from different distributions. I sampled from four different distributions (Px in each quadrant of the figure) and ran two tests: 1) whether this sample came from the same parent distribution as another sample from the same distribution (Px compared to Px) and 2) whether this sample came from the same parent distribution as another sample of the same size drawn from standard normal (Px compared to Py). Both tests have good rejection power, although the 2-d K-S test performs poorly in one case, and has a slightly inflated Type I error rate at all tested sample sizes (the p-value is approximate, so perhaps this is unsurprising). Details follow the figure.
 
-<img src="https://raw.githubusercontent.com/brian-lau/multdist/master/Testing/power-energy.png" alt="Drawing" style="width: 700px;" />
+<img src="https://raw.githubusercontent.com/brian-lau/multdist/master/Testing/statistical-power-comparison-multidimensional.png" alt="Drawing" style="width: 700px;" />
 
 1000 simulations were run for each comparison at each sample length. Py in each case was a Gaussian with zero mean and identity covariance matrix. Starting from the upper left and moving clockwise, Px was drawn from: 1) zero-mean Gaussian with unit variances and covariances = 0.6; 2) Student's t-distribution with 2 degrees of freedom, 3) natural log of the absolute value of a zero-mean Gaussian with an identity covariance matrix; 4) samples from two zero-mean Gaussians with variances scaled to give a non-circular distribution.
 
